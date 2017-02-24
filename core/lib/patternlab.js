@@ -10,7 +10,7 @@
 
 "use strict";
 
-var diveSync = require('diveSync'),
+const diveSync = require('diveSync'),
   glob = require('glob'),
   _ = require('lodash'),
   path = require('path'),
@@ -35,16 +35,25 @@ console.log(
   chalk.bold(']====\n')
 );
 
-var patternEngines = require('./pattern_engines');
-var EventEmitter = require('events').EventEmitter;
+const patternEngines = require('./pattern_engines');
+const EventEmitter = require('events').EventEmitter;
 
+const yaml = require('js-yaml');
+
+/**
+ * Given a path, load info from the folder to compile into a single config object.
+ * @param dataFilesPath
+ * @param fsDep
+ * @returns {{}}
+ */
 function buildPatternData(dataFilesPath, fsDep) {
-  var dataFiles = glob.sync(dataFilesPath + '*.json', {"ignore" : [dataFilesPath + 'listitems.json']});
-  var mergeObject = {};
+  let dataFiles = glob.sync(dataFilesPath + '*.{json,yml,yaml}', {"ignore" : [dataFilesPath + 'listitems.{json,yml,yaml}']});
+  let mergeObject = {};
   dataFiles.forEach(function (filePath) {
-    var jsonData = fsDep.readJSONSync(path.resolve(filePath), 'utf8');
+    let jsonData = yaml.safeLoad(fsDep.readFileSync(path.resolve(filePath), 'utf8'));
     mergeObject = _.merge(mergeObject, jsonData);
   });
+
   return mergeObject;
 }
 
