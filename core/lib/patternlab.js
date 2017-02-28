@@ -501,9 +501,15 @@ var patternlab_engine = function (config) {
       patternlab.data = {};
     }
     try {
-      patternlab.listitems = fs.readJSONSync(path.resolve(paths.source.data, 'listitems.json'));
+      let dataFiles = glob.sync(paths.source.data + 'listitems.{json,yml,yaml}');
+      let mergeObject = {};
+      dataFiles.forEach(function (filePath) {
+        let jsonData = yaml.safeLoad(fs.readFileSync(path.resolve(filePath), 'utf8'));
+        mergeObject = _.merge(mergeObject, jsonData);
+      });
+      patternlab.listitems = mergeObject;
     } catch (ex) {
-      plutils.warning('WARNING: missing or malformed ' + paths.source.data + 'listitems.json file.  Pattern Lab may not work without this file.');
+      plutils.warning('WARNING: missing or malformed ' + paths.source.data + 'listitems file.  Pattern Lab may not work without this file.');
       patternlab.listitems = {};
     }
     try {
